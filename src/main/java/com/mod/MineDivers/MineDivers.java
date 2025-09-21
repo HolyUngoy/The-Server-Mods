@@ -1,4 +1,4 @@
-package com.example.examplemod;
+package com.example.MineDivers;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
@@ -47,6 +47,7 @@ public final class MineDivers {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     // Creates a new Block with the id "examplemod:example_block", combining the namespace and path
+   // Creates a new Block with the id "examplemod:example_block", combining the namespace and path
     public static final RegistryObject<Block> EXAMPLE_BLOCK = BLOCKS.register("example_block",
         () -> new Block(BlockBehaviour.Properties.of()
             .setId(BLOCKS.key("example_block"))
@@ -71,11 +72,60 @@ public final class MineDivers {
         )
     );
 
-    public MineDivers() {
-        var modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        
-        BLOCKS.register(modEventBus);
-        ITEMS.register(modEventBus);
-        CREATIVE_MODE_TABS.register(modEventBus);
+    // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab
+    public static final RegistryObject<CreativeModeTab> EXAMPLE_TAB = CREATIVE_MODE_TABS.register("example_tab", () -> CreativeModeTab.builder()
+            .withTabsBefore(CreativeModeTabs.COMBAT)
+            .icon(() -> EXAMPLE_ITEM.get().getDefaultInstance())
+            .displayItems((parameters, output) -> {
+                output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
+            }).build());
+
+    public MineDivers(FMLJavaModLoadingContext context) {
+        var modBusGroup = context.getModBusGroup();
+
+        // Register the commonSetup method for modloading
+        FMLCommonSetupEvent.getBus(modBusGroup).addListener(this::commonSetup);
+
+        // Register the Deferred Register to the mod event bus so blocks get registered
+        BLOCKS.register(modBusGroup);
+        // Register the Deferred Register to the mod event bus so items get registered
+        ITEMS.register(modBusGroup);
+        // Register the Deferred Register to the mod event bus so tabs get registered
+        CREATIVE_MODE_TABS.register(modBusGroup);
+
+        // Register the item to a creative tab
+        BuildCreativeModeTabContentsEvent.getBus(modBusGroup).addListener(MineDivers::addCreative);
+
+        // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
+        context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        // Some common setup code
+        LOGGER.info("HELLO FROM COMMON SETUP");
+
+        if (Config.logDirtBlock)
+            LOGGER.info("DIRT BLOCK >> {}", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT));
+
+        LOGGER.info(Config.magicNumberIntroduction + Config.magicNumber);
+
+        Config.items.forEach((item) -> LOGGER.info("ITEM >> {}", item.toString()));
+    }
+
+    // Add the example block item to the building blocks tab
+    private static void addCreative(BuildCreativeModeTabContentsEvent event) {
+        if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS)
+            event.accept(EXAMPLE_BLOCK_ITEM);
+    }
+
+    // You can use EventBusSubscriber to automatically register all static methods in the class annotated with @SubscribeEvent
+    @Mod.EventBusSubscriber(modid = MODID, value = Dist.CLIENT)
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+            // Some client setup code
+            LOGGER.info("HELLO FROM CLIENT SETUP");
+            LOGGER.info("MINECRAFT NAME >> {}", Minecraft.getInstance().getUser().getName());
+        }
     }
 }
