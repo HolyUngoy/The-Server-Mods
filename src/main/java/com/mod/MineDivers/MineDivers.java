@@ -58,7 +58,26 @@ public final class MineDivers {
     public static final RegistryObject<Item> EXAMPLE_BLOCK_ITEM = ITEMS.register("example_block",
         () -> new BlockItem(EXAMPLE_BLOCK.get(), new Item.Properties().setId(ITEMS.key("example_block")))
     );
-
+    public static final RegistryObject<Item> TEST_THROWING_OBJECT = ITEMS.register("test_throwing_object",
+    () -> new Item(new Item.Properties().setId(ITEMS.key("test_throwing_object"))) {
+        @Override
+        public InteractionHand use(Level level, Player player, InteractionHand hand) {
+            ItemStack itemstack = player.getItemInHand(hand);
+            if (!player.getAbilities().instabuild) {
+                itemstack.shrink(1);
+            }
+            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.5F, 1.0F);
+            if (!level.isClientSide) {
+                Snowball snowball = new Snowball(level, player);
+                // Reduce velocity for shorter throw distance
+                snowball.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 0.75F, 1.0F);
+                level.addFreshEntity(snowball);
+            }
+            player.awardStat(Stats.ITEM_USED.get(this));
+            return InteractionHand.SUCCESS;
+        }
+    }
+);
     // Creates a new food item with the id "examplemod:example_id", nutrition 1 and saturation 2
     public static final RegistryObject<Item> EXAMPLE_ITEM = ITEMS.register("example_item",
         () -> new Item(new Item.Properties()
