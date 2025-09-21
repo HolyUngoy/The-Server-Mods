@@ -1,0 +1,96 @@
+plugins {
+    id 'java'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[6.0,6.2)'
+}
+
+version = '0.0.1'
+group = 'com.mod.MineDivers'
+archivesBaseName = 'minedivers'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+minecraft {
+    mappings channel: 'official', version: '1.21.1'
+    
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                minedivers {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                minedivers {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        data {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            args '--mod', 'minedivers', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            mods {
+                minedivers {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+repositories {
+    // Add any repositories here if needed
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.21.1-47.1.0'
+}
+
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "minedivers",
+            "Specification-Vendor": "minedivers",
+            "Specification-Version": "1",
+            "Implementation-Title": project.name,
+            "Implementation-Version": project.jar.archiveVersion,
+            "Implementation-Vendor" :"minedivers",
+            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+}
+
+jar.finalizedBy('reobfJar')
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+        }
+    }
+    repositories {
+        maven {
+            url "file://${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
