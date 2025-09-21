@@ -15,6 +15,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 minecraft {
     mappings channel: 'official', version: '1.21.1'
     
+    // This property allows you to optionally define your access transformer file.
+    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+    
     runs {
         client {
             workingDirectory project.file('run')
@@ -55,11 +58,14 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    // Add any repositories here if needed
+    maven {
+        name = 'MinecraftForge'
+        url = 'https://maven.minecraftforge.net/'
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.21.1-47.1.0'
+    minecraft 'net.minecraftforge:forge:1.21.1-47.3.0' // Updated to the latest version
 }
 
 jar {
