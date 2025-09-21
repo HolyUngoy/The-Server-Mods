@@ -1,21 +1,13 @@
-package com.example.MineDivers;
+package com.mod.minedivers;
 
 import com.mojang.logging.LogUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
-import net.minecraft.stats.Stats;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -33,21 +25,21 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import org.slf4j.Logger;
 
-@Mod(MineDivers.MODID)
-public final class MineDivers {
+// The value here should match an entry in the META-INF/mods.toml file
+@Mod(minedivers.MODID)
+public final class minedivers {
     // Define mod id in a common place for everything to reference
-    public static final String MODID = "MineDivers";
+    public static final String MODID = "minedivers";
     // Directly reference a slf4j logger
     private static final Logger LOGGER = LogUtils.getLogger();
     // Create a Deferred Register to hold Blocks which will all be registered under the "examplemod" namespace
     public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MODID);
     // Create a Deferred Register to hold Items which will all be registered under the "examplemod" namespace
-    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.Items, MODID);
+    public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MODID);
     // Create a Deferred Register to hold CreativeModeTabs which will all be registered under the "examplemod" namespace
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     // Creates a new Block with the id "examplemod:example_block", combining the namespace and path
-   // Creates a new Block with the id "examplemod:example_block", combining the namespace and path
     public static final RegistryObject<Block> EXAMPLE_BLOCK = BLOCKS.register("example_block",
         () -> new Block(BlockBehaviour.Properties.of()
             .setId(BLOCKS.key("example_block"))
@@ -58,26 +50,7 @@ public final class MineDivers {
     public static final RegistryObject<Item> EXAMPLE_BLOCK_ITEM = ITEMS.register("example_block",
         () -> new BlockItem(EXAMPLE_BLOCK.get(), new Item.Properties().setId(ITEMS.key("example_block")))
     );
-    public static final RegistryObject<Item> TEST_THROWING_OBJECT = ITEMS.register("test_throwing_object",
-    () -> new Item(new Item.Properties().setId(ITEMS.key("test_throwing_object"))) {
-        @Override
-        public InteractionHand use(Level level, Player player, InteractionHand hand) {
-            ItemStack itemstack = player.getItemInHand(hand);
-            if (!player.getAbilities().instabuild) {
-                itemstack.shrink(1);
-            }
-            level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW, SoundSource.PLAYERS, 0.5F, 1.0F);
-            if (!level.isClientSide) {
-                Snowball snowball = new Snowball(level, player);
-                // Reduce velocity for shorter throw distance
-                snowball.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0F, 0.75F, 1.0F);
-                level.addFreshEntity(snowball);
-            }
-            player.awardStat(Stats.ITEM_USED.get(this));
-            return InteractionHand.SUCCESS;
-        }
-    }
-);
+
     // Creates a new food item with the id "examplemod:example_id", nutrition 1 and saturation 2
     public static final RegistryObject<Item> EXAMPLE_ITEM = ITEMS.register("example_item",
         () -> new Item(new Item.Properties()
@@ -99,7 +72,7 @@ public final class MineDivers {
                 output.accept(EXAMPLE_ITEM.get()); // Add the example item to the tab. For your own tabs, this method is preferred over the event
             }).build());
 
-    public MineDivers(FMLJavaModLoadingContext context) {
+    public minedivers(FMLJavaModLoadingContext context) {
         var modBusGroup = context.getModBusGroup();
 
         // Register the commonSetup method for modloading
@@ -113,7 +86,7 @@ public final class MineDivers {
         CREATIVE_MODE_TABS.register(modBusGroup);
 
         // Register the item to a creative tab
-        BuildCreativeModeTabContentsEvent.getBus(modBusGroup).addListener(MineDivers::addCreative);
+        BuildCreativeModeTabContentsEvent.getBus(modBusGroup).addListener(minedivers::addCreative);
 
         // Register our mod's ForgeConfigSpec so that Forge can create and load the config file for us
         context.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
